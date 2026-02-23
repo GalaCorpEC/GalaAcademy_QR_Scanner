@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:toastification/toastification.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(const MyApp());
@@ -7,116 +10,208 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: .fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: .center,
-          children: [
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
+    // ToastificationWrapper es necesario para manejar las notificaciones
+    return ToastificationWrapper(
+      child: MaterialApp(
+        title: 'Gala Academy QR Scanner',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+        home: const QRScannerPage(),
       ),
     );
+  }
+}
+
+class QRScannerPage extends StatefulWidget {
+  const QRScannerPage({super.key});
+
+  @override
+  State<QRScannerPage> createState() => _QRScannerPageState();
+}
+
+class _QRScannerPageState extends State<QRScannerPage> {
+  bool _isProcessing = false;
+  final MobileScannerController _controller = MobileScannerController();
+
+  Future<void> _handleScan(String? code) async {
+    // Evitamos escanear varias veces mientras procesamos una petición
+    if (code == null || _isProcessing) return;
+
+    if (mounted) {
+      setState(() {
+        _isProcessing = true;
+      });
+    }
+
+    try {
+      // Validamos que sea una URL antes de intentar la petición
+      final uri = Uri.tryParse(code);
+      if (uri == null || !uri.hasScheme) {
+        _showToast(
+          title: 'QR Inválido',
+          description: 'Contenido: $code',
+          type: ToastificationType.warning,
+        );
+      } else {
+        // Realizamos la petición a la API
+        final response = await http.get(uri);
+
+        if (response.statusCode == 200) {
+          _showToast(
+            title: '¡Éxito!',
+            description: 'Entrada validada correctamente.',
+            type: ToastificationType.success,
+          );
+        } else {
+          _showToast(
+            title: 'Error de Servidor (${response.statusCode})',
+            description:
+                'Respuesta: ${response.body.isNotEmpty ? response.body : "Sin detalles"}',
+            type: ToastificationType.error,
+          );
+        }
+      }
+    } catch (e) {
+      _showToast(
+        title: 'Error de Red / QR',
+        description: 'Detalle: $e',
+        type: ToastificationType.error,
+      );
+    } finally {
+      // Esperamos 3 segundos antes de volver a habilitar el scanner
+      // Esto evita peticiones infinitas si el QR sigue en pantalla
+      await Future.delayed(const Duration(seconds: 3));
+      if (mounted) {
+        setState(() {
+          _isProcessing = false;
+        });
+      }
+    }
+  }
+
+  void _showToast({
+    required String title,
+    required String description,
+    required ToastificationType type,
+  }) {
+    toastification.show(
+      context: context,
+      type: type,
+      style: ToastificationStyle.flatColored,
+      title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+      description: Text(description),
+      alignment: Alignment.bottomCenter,
+      autoCloseDuration: const Duration(seconds: 4),
+      borderRadius: BorderRadius.circular(12),
+      showProgressBar: true,
+      animationDuration: const Duration(milliseconds: 300),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // El tamaño del cuadrado de escaneo
+    const double scanAreaSize = 250.0;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Validador de Entradas'),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
+      body: Stack(
+        children: [
+          // 1. Scanner en el centro con ventana de escaneo limitada
+          Center(
+            child: SizedBox(
+              width: scanAreaSize,
+              height: scanAreaSize,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(30),
+                child: MobileScanner(
+                  controller: _controller,
+                  // Solo escanea lo que está dentro de este widget
+                  fit: BoxFit.cover,
+                  onDetect: (capture) {
+                    final List<Barcode> barcodes = capture.barcodes;
+                    if (barcodes.isNotEmpty) {
+                      _handleScan(barcodes.first.rawValue);
+                    }
+                  },
+                ),
+              ),
+            ),
+          ),
+
+          // 2. Fondo blanco con hueco central (opcional si prefieres que el resto sea blanco puro)
+          // Aquí simplemente dejamos el Scaffold blanco y centramos el scanner.
+
+          // 3. Overlay para procesando (solo sobre el área del scanner o toda la pantalla)
+          if (_isProcessing)
+            Center(
+              child: Container(
+                width: scanAreaSize,
+                height: scanAreaSize,
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              ),
+            ),
+
+          // 4. Borde del área de escaneo
+          Center(
+            child: Container(
+              width: scanAreaSize,
+              height: scanAreaSize,
+              decoration: BoxDecoration(
+                border: Border.all(
+                  color: _isProcessing ? Colors.grey : Colors.blue,
+                  width: 2,
+                ),
+                borderRadius: BorderRadius.circular(30),
+              ),
+            ),
+          ),
+
+          // 5. Instrucciones (ARRIBA del recuadro)
+          Positioned(
+            bottom:
+                (MediaQuery.of(context).size.height / 2) +
+                (scanAreaSize / 2) +
+                20,
+            left: 0,
+            right: 0,
+            child: const Center(
+              child: Text(
+                'Coloca el código QR dentro del recuadro',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.black54,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 }
