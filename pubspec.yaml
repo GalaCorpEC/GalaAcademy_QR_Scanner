@@ -1,4 +1,4 @@
-name: h
+name: gala_academy_scanner
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -37,6 +37,10 @@ dependencies:
   mobile_scanner: ^7.2.0
   toastification: ^3.0.3
   http: ^1.6.0
+  flutter_riverpod: 3.2.1
+  riverpod_annotation: ^4.0.2
+  state_notifier: ^1.0.0
+  shared_preferences: ^2.5.4
 
 dev_dependencies:
   flutter_test:
