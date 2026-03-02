@@ -54,11 +54,11 @@ class AuthNotifier extends Notifier<AuthState> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString(_tokenKey);
     final nombre = prefs.getString(_nombreKey);
-    
+
     if (token != null) {
       state = state.copyWith(
-        isAuthenticated: true, 
-        isChecking: false, 
+        isAuthenticated: true,
+        isChecking: false,
         token: token,
         nombre: nombre,
       );
@@ -71,26 +71,25 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      print('━━━━━━━━━━━━━━━━━━━━ 🚀 LOGIN START ━━━━━━━━━━━━━━━━━━━━');
-      print('📍 URL: $_url');
-      print('👤 USER: $email');
-      
-      final response = await http.post(
-        Uri.parse(_url),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'x-client': 'mobile',
-          'ngrok-skip-browser-warning': 'true',
-        },
-        body: jsonEncode({
-          'email': email,
-          'password': password,
-        }),
-      ).timeout(const Duration(seconds: 15));
+      // print('━━━━━━━━━━━━━━━━━━━━ 🚀 LOGIN START ━━━━━━━━━━━━━━━━━━━━');
+      // print('📍 URL: $_url');
+      // print('👤 USER: $email');
 
-      print('📡 STATUS: ${response.statusCode}');
-      print('📦 BODY: ${response.body}');
+      final response = await http
+          .post(
+            Uri.parse(_url),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'x-client': 'mobile',
+              'ngrok-skip-browser-warning': 'true',
+            },
+            body: jsonEncode({'email': email, 'password': password}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      // print('📡 STATUS: ${response.statusCode}');
+      // print('📦 BODY: ${response.body}');
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
@@ -104,25 +103,27 @@ class AuthNotifier extends Notifier<AuthState> {
         if (nombre != null) await prefs.setString(_nombreKey, nombre);
 
         state = state.copyWith(
-          isLoading: false, 
+          isLoading: false,
           isAuthenticated: true,
           token: token,
           nombre: nombre,
         );
-        print('✅ LOGIN SUCCESS: Bienvenido $nombre');
+        // print('✅ LOGIN SUCCESS: Bienvenido $nombre');
       } else {
         state = state.copyWith(
-          isLoading: false, 
-          error: responseData['message'] ?? "Error de autenticación (${response.statusCode})"
+          isLoading: false,
+          error:
+              responseData['message'] ??
+              "Error de autenticación (${response.statusCode})",
         );
-        print('⚠️ LOGIN FAILED: ${responseData['message']}');
+        // print('⚠️ LOGIN FAILED: ${responseData['message']}');
       }
-      print('━━━━━━━━━━━━━━━━━━━━ 🏁 LOGIN END ━━━━━━━━━━━━━━━━━━━━━━');
+      // print('━━━━━━━━━━━━━━━━━━━━ 🏁 LOGIN END ━━━━━━━━━━━━━━━━━━━━━━');
     } catch (e) {
-      print('❌ LOGIN ERROR: $e');
+      // print('❌ LOGIN ERROR: $e');
       state = state.copyWith(
-        isLoading: false, 
-        error: "Error de conexión, por favor intente nuevamente"
+        isLoading: false,
+        error: "Error de conexión, por favor intente nuevamente",
       );
     }
   }
@@ -132,7 +133,7 @@ class AuthNotifier extends Notifier<AuthState> {
     await prefs.remove(_tokenKey);
     await prefs.remove(_nombreKey);
     state = AuthState(isChecking: false);
-    print('🚪 SESSION CLOSED');
+    // print('🚪 SESSION CLOSED');
   }
 }
 

@@ -65,8 +65,8 @@ class EventsNotifier extends Notifier<EventsState> {
     final token = authState.token;
 
     try {
-      print('━━━━━━━━━━━━━━━━━━━━ 📅 FETCH EVENTS START ━━━━━━━━━━━━━━━━━━━━');
-      print('📍 URL: $_url');
+      // print('━━━━━━━━━━━━━━━━━━━━ 📅 FETCH EVENTS START ━━━━━━━━━━━━━━━━━━━━');
+      // print('📍 URL: $_url');
 
       final response = await http
           .get(
@@ -81,8 +81,8 @@ class EventsNotifier extends Notifier<EventsState> {
           )
           .timeout(const Duration(seconds: 15));
 
-      print('📡 STATUS: ${response.statusCode}');
-      print('📦 RESPONSE: ${response.body}');
+      // print('📡 STATUS: ${response.statusCode}');
+      // print('📦 RESPONSE: ${response.body}');
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
@@ -91,9 +91,11 @@ class EventsNotifier extends Notifier<EventsState> {
         final eventsList = data.map((json) => Event.fromJson(json)).toList();
 
         state = state.copyWith(isLoading: false, events: eventsList);
+        /*
         print(
           '✅ FETCH EVENTS SUCCESS: ${eventsList.length} eventos encontrados',
         );
+        */
       } else {
         state = state.copyWith(
           isLoading: false,
@@ -102,10 +104,10 @@ class EventsNotifier extends Notifier<EventsState> {
               "Error al cargar eventos (${response.statusCode})",
         );
       }
-      print('━━━━━━━━━━━━━━━━━━━━ 🏁 FETCH EVENTS END ━━━━━━━━━━━━━━━━━━━━━━');
-    } catch (e, stackTrace) {
-      print('❌ FETCH EVENTS ERROR: $e');
-      print('📚 STACKTRACE: $stackTrace');
+      // print('━━━━━━━━━━━━━━━━━━━━ 🏁 FETCH EVENTS END ━━━━━━━━━━━━━━━━━━━━━━');
+    } catch (e) {
+      // print('❌ FETCH EVENTS ERROR: $e');
+      // print('📚 STACKTRACE: $stackTrace');
       state = state.copyWith(isLoading: false, error: "Error: $e");
     }
   }

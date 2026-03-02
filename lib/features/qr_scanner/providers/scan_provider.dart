@@ -38,9 +38,9 @@ class ScanNotifier extends Notifier<ScanState> {
   }
 
   void setEvent(int eventId) {
-    print('━━━━━━━━━━━━━━━━━━━━ 🎯 EVENT SELECTED ━━━━━━━━━━━━━━━━━━━━');
-    print('🆔 ID EVENTO: $eventId');
-    print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    // print('━━━━━━━━━━━━━━━━━━━━ 🎯 EVENT SELECTED ━━━━━━━━━━━━━━━━━━━━');
+    // print('🆔 ID EVENTO: $eventId');
+    // print('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     state = state.copyWith(selectedEventId: eventId);
   }
 
@@ -75,10 +75,10 @@ class ScanNotifier extends Notifier<ScanState> {
       final String apiUrl =
           'https://50f7-190-152-93-126.ngrok-free.app/eventos/$eventId/validar-entrada/$ticketId';
 
-      print('━━━━━━━━━━━━━━━━━━━━ 🔍 SCAN POST START ━━━━━━━━━━━━━━━━━━━━');
-      print('📍 URL FINAL: $apiUrl');
-      print('🎫 TICKET ID: $ticketId');
-      print('📅 EVENTO ID: $eventId');
+      // print('━━━━━━━━━━━━━━━━━━━━ 🔍 SCAN POST START ━━━━━━━━━━━━━━━━━━━━');
+      // print('📍 URL FINAL: $apiUrl');
+      // print('🎫 TICKET ID: $ticketId');
+      // print('📅 EVENTO ID: $eventId');
 
       final response = await http
           .post(
@@ -93,8 +93,8 @@ class ScanNotifier extends Notifier<ScanState> {
           )
           .timeout(const Duration(seconds: 15));
 
-      print('📡 STATUS: ${response.statusCode}');
-      print('📦 RESPONSE: ${response.body}');
+      // print('📡 STATUS: ${response.statusCode}');
+      // print('📦 RESPONSE: ${response.body}');
 
       final Map<String, dynamic> responseData = jsonDecode(response.body);
 
@@ -123,9 +123,9 @@ class ScanNotifier extends Notifier<ScanState> {
           isError: true,
         );
       }
-      print('━━━━━━━━━━━━━━━━━━━━ 🏁 SCAN END ━━━━━━━━━━━━━━━━━━━━━━');
+      // print('━━━━━━━━━━━━━━━━━━━━ 🏁 SCAN END ━━━━━━━━━━━━━━━━━━━━━━');
     } catch (e) {
-      print('❌ SCAN ERROR: $e');
+      // print('❌ SCAN ERROR: $e');
       state = state.copyWith(
         isProcessing: false,
         lastResult: "Error crítico de conexión",

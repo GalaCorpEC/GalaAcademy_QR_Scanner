@@ -52,7 +52,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
                               const Text('👋', style: TextStyle(fontSize: 24)),
                               const SizedBox(width: 12),
                               Text(
-                                'Hola, ${authState.nombre?.split(' ')[0] ?? "Admin"}',
+                                'Hola ${authState.nombre?.split(' ')[0] ?? "Admin"}',
                                 style: const TextStyle(
                                   fontSize: 26,
                                   fontWeight: FontWeight.w900,
