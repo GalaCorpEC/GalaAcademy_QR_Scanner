@@ -13,10 +13,11 @@ class QRScannerView extends ConsumerStatefulWidget {
 class _QRScannerViewState extends ConsumerState<QRScannerView> {
   final MobileScannerController controller = MobileScannerController(
     formats: [BarcodeFormat.qrCode],
-    detectionSpeed: DetectionSpeed.noDuplicates,
+    detectionSpeed: DetectionSpeed.normal,
   );
 
   bool _isModalOpen = false;
+  bool _qrDetected = false;
 
   @override
   void dispose() {
@@ -38,6 +39,9 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
         setState(() => _isModalOpen = true);
         _showResultDialog(context, next.lastResult!, next.isError);
       }
+      if (next.lastResult == null) {
+        setState(() => _qrDetected = false);
+      }
     });
 
     return Scaffold(
@@ -53,13 +57,15 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
             ),
             onDetect: (capture) {
               final List<Barcode> barcodes = capture.barcodes;
-              if (barcodes.isNotEmpty &&
-                  !scanState.isProcessing &&
-                  !_isModalOpen &&
-                  scanState.lastResult == null) {
+              if (barcodes.isNotEmpty && !_qrDetected) {
                 final String code = barcodes.first.rawValue ?? "";
                 if (code.isNotEmpty) {
-                  ref.read(scanProvider.notifier).processUrl(code);
+                  setState(() => _qrDetected = true);
+                  Future.delayed(const Duration(milliseconds: 500), () {
+                    if (mounted) {
+                      ref.read(scanProvider.notifier).processUrl(code);
+                    }
+                  });
                 }
               }
             },
@@ -67,13 +73,37 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
 
           _buildScannerOverlay(context),
 
+          if (_qrDetected)
+            Positioned(
+              top: 100,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'QR Detectado',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
           Positioned(
             top: 50,
             left: 20,
             child: _buildCircleButton(
               icon: Icons.close_rounded,
               onTap: () => Navigator.pop(context),
-              color: Colors.white.withOpacity(0.9),
+              color: Colors.white.withValues(alpha: 0.9),
             ),
           ),
 
@@ -88,11 +118,11 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.9),
+                  color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       blurRadius: 10,
                     ),
                   ],
@@ -122,7 +152,7 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
 
           if (scanState.isProcessing)
             Container(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha: 0.8),
               child: const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -157,11 +187,11 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
         width: 54,
         height: 54,
         decoration: BoxDecoration(
-          color: color ?? Colors.white.withOpacity(0.9),
+          color: color ?? Colors.white.withValues(alpha: 0.9),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: Colors.black.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -180,7 +210,7 @@ class _QRScannerViewState extends ConsumerState<QRScannerView> {
       children: [
         ColorFiltered(
           colorFilter: ColorFilter.mode(
-            Colors.black.withOpacity(0.7),
+            Colors.black.withValues(alpha: 0.7),
             BlendMode.srcOut,
           ),
           child: Stack(

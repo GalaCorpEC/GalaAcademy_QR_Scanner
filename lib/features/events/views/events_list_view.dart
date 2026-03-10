@@ -86,7 +86,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
                           borderRadius: BorderRadius.circular(16),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.05),
+                              color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 15,
                               offset: const Offset(0, 5),
                             ),
@@ -144,7 +144,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -163,7 +163,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
                 height: 140,
                 width: double.infinity,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) =>
+                errorBuilder: (_, _, _) =>
                     Container(height: 100, color: const Color(0xFFF3F4F6)),
               ),
             ),
@@ -241,7 +241,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
                   child: Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE57700).withOpacity(0.1),
+                      color: const Color(0xFFE57700).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: const Icon(
@@ -317,7 +317,7 @@ class _EventsListViewState extends ConsumerState<EventsListView> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.event_busy_rounded, size: 48, color: Color(0xFF6A6A6A)),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text(
             'No hay eventos disponibles',
             style: TextStyle(color: Color(0xFF6A6A6A)),

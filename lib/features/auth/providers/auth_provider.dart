@@ -42,7 +42,7 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   static const _tokenKey = 'auth_token';
   static const _nombreKey = 'user_nombre';
-  static const _url = 'https://50f7-190-152-93-126.ngrok-free.app/auth/login';
+  static const _url = 'https://api.galaacademy.com/auth/login';
 
   @override
   AuthState build() {

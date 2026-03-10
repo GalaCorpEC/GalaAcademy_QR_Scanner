@@ -51,7 +51,7 @@ class EventsState {
 }
 
 class EventsNotifier extends Notifier<EventsState> {
-  static const _url = 'https://50f7-190-152-93-126.ngrok-free.app/eventos';
+  static const _url = 'https://api.galaacademy.com/eventos';
 
   @override
   EventsState build() {

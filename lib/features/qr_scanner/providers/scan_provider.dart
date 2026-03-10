@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../auth/providers/auth_provider.dart';
@@ -65,15 +66,34 @@ class ScanNotifier extends Notifier<ScanState> {
     final eventId = state.selectedEventId;
 
     try {
+      // Validamos que el QR sea un ID válido (no una URL externa)
+      if (qrData.startsWith('http://') || qrData.startsWith('https://')) {
+        state = state.copyWith(
+          isProcessing: false,
+          lastResult: "Error: QR inválido. Escanea un código de ticket válido.",
+          isError: true,
+        );
+        return;
+      }
+
       // Extraemos el ID del ticket del QR (asumiendo que viene al final o es el dato puro)
-      // Si el QR ya es una URL, intentamos extraer el ID, si no usamos el dato como ID
       String ticketId = qrData;
       if (qrData.contains('/')) {
         ticketId = qrData.split('/').last;
       }
 
+      // Validación adicional: el ticketId debe ser un UUID o string simple
+      if (ticketId.isEmpty || ticketId.length < 10) {
+        state = state.copyWith(
+          isProcessing: false,
+          lastResult: "Error: Código QR no válido.",
+          isError: true,
+        );
+        return;
+      }
+
       final String apiUrl =
-          'https://50f7-190-152-93-126.ngrok-free.app/eventos/$eventId/validar-entrada/$ticketId';
+          '${dotenv.env['API_BASE_URL']}/eventos/$eventId/validar-entrada/$ticketId';
 
       // print('━━━━━━━━━━━━━━━━━━━━ 🔍 SCAN POST START ━━━━━━━━━━━━━━━━━━━━');
       // print('📍 URL FINAL: $apiUrl');
@@ -91,7 +111,7 @@ class ScanNotifier extends Notifier<ScanState> {
               'ngrok-skip-browser-warning': 'true',
             },
           )
-          .timeout(const Duration(seconds: 15));
+          .timeout(const Duration(seconds: 3));
 
       // print('📡 STATUS: ${response.statusCode}');
       // print('📦 RESPONSE: ${response.body}');
@@ -128,7 +148,7 @@ class ScanNotifier extends Notifier<ScanState> {
       // print('❌ SCAN ERROR: $e');
       state = state.copyWith(
         isProcessing: false,
-        lastResult: "Error crítico de conexión",
+        lastResult: "Error: $e",
         isError: true,
       );
     }

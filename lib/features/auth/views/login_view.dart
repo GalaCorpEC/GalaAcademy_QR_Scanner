@@ -34,7 +34,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFE57700).withOpacity(0.1),
+                      color: const Color(0xFFE57700).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: const Icon(
@@ -124,7 +124,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                   width: double.infinity,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE57700).withOpacity(0.1),
+                    color: const Color(0xFFE57700).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Center(
